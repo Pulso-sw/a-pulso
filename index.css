@@ -1,5 +1,439 @@
-git pull
-# substitua os arquivos index.css e App.jsx pelos que eu gerei
-git add index.css App.jsx
-git commit -m "Novo tema visual: paleta A Pulso, tipografia e modo escuro"
-git push
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+/* =========================================================
+   A PULSO — Design tokens
+   ========================================================= */
+:root {
+  /* Superfícies */
+  --paper: #F6F7FB;
+  --paper-raised: #FFFFFF;
+  --line: #E3E6EE;
+  --line-soft: #EDEFF5;
+
+  /* Texto */
+  --ink: #12141C;
+  --ink-soft: #5B6472;
+  --ink-faint: #8A93A3;
+
+  /* Marca */
+  --pulso: #3A5AFF;
+  --pulso-hover: #2C48E0;
+  --pulso-soft: #EAEEFF;
+  --pulso-vivo: #FF4D6D;
+  --pulso-vivo-soft: #FFE3E8;
+
+  /* Status */
+  --on: #17B978;
+  --on-soft: #E4F9EE;
+  --off: #E5484D;
+  --off-soft: #FDEBEC;
+  --pending: #F5A623;
+  --pending-soft: #FEF3E0;
+
+  /* Tipografia */
+  --font-display: "Space Grotesk", "IBM Plex Sans", sans-serif;
+  --font-body: "IBM Plex Sans", -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Forma */
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --shadow-card: 0 1px 2px rgba(18, 20, 28, 0.04), 0 8px 24px -12px rgba(18, 20, 28, 0.10);
+  --shadow-raised: 0 4px 16px -4px rgba(18, 20, 28, 0.14), 0 16px 40px -20px rgba(18, 20, 28, 0.18);
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --paper: #0B0D13;
+  --paper-raised: #12151E;
+  --line: #232733;
+  --line-soft: #1B1F29;
+
+  --ink: #EDEFF5;
+  --ink-soft: #9AA3B5;
+  --ink-faint: #656E80;
+
+  --pulso: #6D85FF;
+  --pulso-hover: #8397FF;
+  --pulso-soft: #1A2244;
+  --pulso-vivo: #FF6E89;
+  --pulso-vivo-soft: #3A1620;
+
+  --on: #35D391;
+  --on-soft: #10301F;
+  --off: #FF6B70;
+  --off-soft: #3A1417;
+  --pending: #FFC24B;
+  --pending-soft: #3A2A0C;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+  --shadow-raised: 0 4px 16px -4px rgba(0, 0, 0, 0.5), 0 16px 40px -20px rgba(0, 0, 0, 0.6);
+
+  color-scheme: dark;
+}
+
+/* =========================================================
+   Reset & base
+   ========================================================= */
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0;
+}
+
+a { color: inherit; text-decoration: none; }
+
+button, input, select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--pulso);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* =========================================================
+   Shell & topbar
+   ========================================================= */
+.app-shell {
+  min-height: 100%;
+  background: var(--paper);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: var(--paper-raised);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+.brand .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--pulso-vivo);
+  box-shadow: 0 0 0 4px var(--pulso-vivo-soft);
+  animation: beat 1.8s ease-in-out infinite;
+}
+
+@keyframes beat {
+  0%, 100% { transform: scale(1); }
+  20% { transform: scale(1.35); }
+  40% { transform: scale(1); }
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.nav-tabs a {
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.nav-tabs a:hover { background: var(--line-soft); color: var(--ink); }
+
+.nav-tabs a.active {
+  background: var(--pulso-soft);
+  color: var(--pulso);
+  font-weight: 600;
+}
+
+/* =========================================================
+   Theme toggle
+   ========================================================= */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.theme-toggle:hover { background: var(--line-soft); }
+
+/* =========================================================
+   Page & buttons
+   ========================================================= */
+.page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 40px 32px 64px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pulso);
+  margin: 0 0 8px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+.btn-primary {
+  background: var(--pulso);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) { background: var(--pulso-hover); }
+
+.btn-pulso {
+  background: var(--pulso-vivo);
+  color: #fff;
+  box-shadow: 0 8px 24px -8px var(--pulso-vivo);
+}
+.btn-pulso:hover:not(:disabled) { filter: brightness(1.06); }
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink-soft);
+}
+.btn-ghost:hover:not(:disabled) { background: var(--line-soft); color: var(--ink); }
+
+/* =========================================================
+   Cards
+   ========================================================= */
+.card {
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* =========================================================
+   Punch clock (signature element)
+   ========================================================= */
+.punch-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+  padding: 36px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.punch-clock {
+  font-family: var(--font-mono);
+  font-size: 2.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.status-pill .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.status-pill.on {
+  background: var(--on-soft);
+  color: var(--on);
+}
+.status-pill.on .dot { background: var(--on); animation: beat 1.6s ease-in-out infinite; }
+
+.status-pill.off {
+  background: var(--off-soft);
+  color: var(--off);
+}
+.status-pill.off .dot { background: var(--off); }
+
+/* =========================================================
+   Forms
+   ========================================================= */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.field label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.field input,
+.field select,
+input[type="date"],
+input[type="datetime-local"] {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: var(--pulso);
+}
+
+.error-msg {
+  background: var(--off-soft);
+  color: var(--off);
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+.hint {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin-top: 20px;
+}
+
+/* =========================================================
+   Tables
+   ========================================================= */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+th {
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  padding: 0 12px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--ink);
+}
+
+tr:last-child td { border-bottom: none; }
+
+/* =========================================================
+   Login
+   ========================================================= */
+.login-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 15% 20%, var(--pulso-soft), transparent 45%),
+    radial-gradient(circle at 85% 80%, var(--pulso-vivo-soft), transparent 40%),
+    var(--paper);
+  padding: 24px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-raised);
+  padding: 36px 32px 28px;
+}
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+@media (max-width: 640px) {
+  .topbar { padding: 14px 18px; }
+  .page { padding: 28px 18px 48px; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .punch-clock { font-size: 2.1rem; }
+  table { font-size: 0.82rem; }
+}
