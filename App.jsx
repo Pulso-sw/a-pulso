@@ -5,10 +5,20 @@ import Login from "./Login";
 import Dashboard from "./Dashboard";
 import Admin from "./Admin";
 
-function Topbar({ perfil, onSair }) {
+function useTema() {
+  const [tema, setTema] = useState(() => localStorage.getItem("a-pulso-tema") || "claro");
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", tema === "escuro" ? "dark" : "light");
+    localStorage.setItem("a-pulso-tema", tema);
+  }, [tema]);
+
+  return [tema, setTema];
+}
+
+function Topbar({ perfil, onSair, tema, onAlternarTema }) {
   const location = useLocation();
   const podeVerEquipe = perfil?.cargo === "administrador" || perfil?.cargo === "rh";
-
   return (
     <div className="topbar">
       <Link to="/" className="brand"><span className="dot" /> A Pulso</Link>
@@ -19,6 +29,14 @@ function Topbar({ perfil, onSair }) {
             <Link className={location.pathname === "/equipe" ? "active" : ""} to="/equipe">Equipe</Link>
           )}
         </div>
+        <button
+          className="theme-toggle"
+          onClick={onAlternarTema}
+          aria-label={tema === "escuro" ? "Mudar para tema claro" : "Mudar para tema escuro"}
+          title={tema === "escuro" ? "Mudar para tema claro" : "Mudar para tema escuro"}
+        >
+          {tema === "escuro" ? "☀️" : "🌙"}
+        </button>
         <button className="btn btn-ghost" onClick={onSair}>Sair</button>
       </nav>
     </div>
@@ -28,6 +46,7 @@ function Topbar({ perfil, onSair }) {
 export default function App() {
   const [sessao, setSessao] = useState(undefined); // undefined = carregando
   const [perfil, setPerfil] = useState(null);
+  const [tema, setTema] = useTema();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -55,11 +74,17 @@ export default function App() {
     await supabase.auth.signOut();
   }
 
+  function alternarTema() {
+    setTema((t) => (t === "escuro" ? "claro" : "escuro"));
+  }
+
   const podeVerEquipe = perfil?.cargo === "administrador" || perfil?.cargo === "rh";
 
   return (
     <div className="app-shell">
-      {sessao && perfil && <Topbar perfil={perfil} onSair={handleSair} />}
+      {sessao && perfil && (
+        <Topbar perfil={perfil} onSair={handleSair} tema={tema} onAlternarTema={alternarTema} />
+      )}
       <Routes>
         <Route path="/login" element={sessao ? <Navigate to="/" replace /> : <Login />} />
         <Route
