@@ -367,6 +367,75 @@ input[type="datetime-local"] {
   margin-bottom: 16px;
 }
 
+.success-msg {
+  background: var(--on-soft);
+  color: var(--on);
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+.field-icon {
+  position: relative;
+}
+
+.field-icon svg {
+  position: absolute;
+  left: 14px;
+  top: 41px;
+  color: var(--ink-faint);
+  pointer-events: none;
+}
+
+.field-icon input {
+  padding-left: 42px;
+  width: 100%;
+}
+
+.field-icon .eye-toggle {
+  position: absolute;
+  right: 10px;
+  top: 30px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-faint);
+  padding: 6px;
+  display: flex;
+}
+
+.field-icon .eye-toggle:hover { color: var(--ink-soft); }
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.checkbox-row input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--pulso);
+  cursor: pointer;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--pulso);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+.link-btn:hover { color: var(--pulso-hover); }
+
 .hint {
   text-align: center;
   font-size: 0.85rem;
@@ -410,11 +479,21 @@ tr:last-child td { border-bottom: none; }
   display: flex;
   align-items: center;
   justify-content: center;
-  background:
-    radial-gradient(circle at 15% 20%, var(--pulso-soft), transparent 45%),
-    radial-gradient(circle at 85% 80%, var(--pulso-vivo-soft), transparent 40%),
-    var(--paper);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, #1B2657 0%, var(--pulso) 55%, #1B2657 100%);
   padding: 24px;
+}
+
+.login-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 25%, rgba(255, 77, 109, 0.35), transparent 40%),
+    radial-gradient(circle at 82% 75%, rgba(255, 255, 255, 0.12), transparent 45%),
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.05) 0px, rgba(255, 255, 255, 0.05) 1px, transparent 1px, transparent 64px);
+  pointer-events: none;
 }
 
 .login-card {
@@ -423,8 +502,10 @@ tr:last-child td { border-bottom: none; }
   background: var(--paper-raised);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-raised);
+  box-shadow: 0 30px 70px -20px rgba(10, 14, 40, 0.55);
   padding: 36px 32px 28px;
+  position: relative;
+  z-index: 1;
 }
 
 /* =========================================================
