@@ -2,12 +2,26 @@ import { useState } from "react";
 import { supabase } from "./supabaseClient";
 import PulseLine from "./PulseLine";
 
+const PERFIS = [
+  { valor: "administrador", label: "Administrador / Gestor", desc: "Visualização e aprovações" },
+  { valor: "rh", label: "Recursos Humanos", desc: "Ajustes de horários e aprovações" },
+  { valor: "funcionario", label: "Funcionário", desc: "Uso e solicitações" }
+];
+
+const CATEGORIAS = [
+  { valor: "estagiario", label: "Estagiário" },
+  { valor: "menor_aprendiz", label: "Menor Aprendiz" },
+  { valor: "trainee", label: "Trainee" },
+  { valor: "clt", label: "CLT" }
+];
+
 export default function Login() {
   const [modo, setModo] = useState("entrar"); // "entrar" | "cadastrar"
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [nome, setNome] = useState("");
-  const [ehAdmin, setEhAdmin] = useState(false);
+  const [cargo, setCargo] = useState("funcionario");
+  const [categoria, setCategoria] = useState("clt");
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
 
@@ -34,9 +48,12 @@ export default function Login() {
 
     const userId = data.user?.id;
     if (userId) {
-      const { error: erroPerfil } = await supabase
-        .from("perfis")
-        .insert({ id: userId, nome, cargo: ehAdmin ? "admin" : "colaborador" });
+      const { error: erroPerfil } = await supabase.from("perfis").insert({
+        id: userId,
+        nome,
+        cargo,
+        categoria: cargo === "funcionario" ? categoria : null
+      });
       if (erroPerfil) setErro(erroPerfil.message);
     }
     setCarregando(false);
@@ -86,10 +103,51 @@ export default function Login() {
           </div>
 
           {modo === "cadastrar" && (
-            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.85rem", marginBottom: 16, color: "var(--ink-soft)" }}>
-              <input type="checkbox" checked={ehAdmin} onChange={(e) => setEhAdmin(e.target.checked)} />
-              Sou administrador(a) — vou gerenciar a equipe
-            </label>
+            <>
+              <div className="field">
+                <label>Qual é o seu perfil?</label>
+                {PERFIS.map((p) => (
+                  <label
+                    key={p.valor}
+                    style={{
+                      display: "flex", alignItems: "flex-start", gap: 8, fontSize: "0.85rem",
+                      padding: "10px 12px", marginBottom: 6, borderRadius: 10,
+                      border: cargo === p.valor ? "1.5px solid var(--pulso)" : "1px solid var(--line)",
+                      cursor: "pointer"
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="cargo"
+                      value={p.valor}
+                      checked={cargo === p.valor}
+                      onChange={(e) => setCargo(e.target.value)}
+                      style={{ marginTop: 3 }}
+                    />
+                    <span>
+                      <strong>{p.label}</strong>
+                      <div style={{ color: "var(--ink-soft)" }}>{p.desc}</div>
+                    </span>
+                  </label>
+                ))}
+              </div>
+
+              {cargo === "funcionario" && (
+                <div className="field">
+                  <label htmlFor="categoria">Categoria</label>
+                  <select
+                    id="categoria"
+                    value={categoria}
+                    onChange={(e) => setCategoria(e.target.value)}
+                    style={{ padding: "12px 14px", borderRadius: 10, border: "1px solid var(--line)", fontSize: "0.95rem" }}
+                  >
+                    {CATEGORIAS.map((c) => (
+                      <option key={c.valor} value={c.valor}>{c.label}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </>
           )}
 
           <button className="btn btn-primary" style={{ width: "100%" }} disabled={carregando}>

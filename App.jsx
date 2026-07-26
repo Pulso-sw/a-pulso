@@ -7,14 +7,16 @@ import Admin from "./Admin";
 
 function Topbar({ perfil, onSair }) {
   const location = useLocation();
+  const podeVerEquipe = perfil?.cargo === "administrador" || perfil?.cargo === "rh";
+
   return (
     <div className="topbar">
       <Link to="/" className="brand"><span className="dot" /> A Pulso</Link>
       <nav style={{ display: "flex", alignItems: "center", gap: 16 }}>
         <div className="nav-tabs" style={{ marginBottom: 0 }}>
           <Link className={location.pathname === "/" ? "active" : ""} to="/">Meu ponto</Link>
-          {perfil?.cargo === "admin" && (
-            <Link className={location.pathname === "/admin" ? "active" : ""} to="/admin">Equipe</Link>
+          {podeVerEquipe && (
+            <Link className={location.pathname === "/equipe" ? "active" : ""} to="/equipe">Equipe</Link>
           )}
         </div>
         <button className="btn btn-ghost" onClick={onSair}>Sair</button>
@@ -53,6 +55,8 @@ export default function App() {
     await supabase.auth.signOut();
   }
 
+  const podeVerEquipe = perfil?.cargo === "administrador" || perfil?.cargo === "rh";
+
   return (
     <div className="app-shell">
       {sessao && perfil && <Topbar perfil={perfil} onSair={handleSair} />}
@@ -65,20 +69,22 @@ export default function App() {
               <Navigate to="/login" replace />
             ) : !perfil ? (
               <div className="page">Preparando seu perfil...</div>
+            ) : podeVerEquipe ? (
+              <Navigate to="/equipe" replace />
             ) : (
               <Dashboard perfil={perfil} usuarioId={sessao.user.id} />
             )
           }
         />
         <Route
-          path="/admin"
+          path="/equipe"
           element={
             !sessao ? (
               <Navigate to="/login" replace />
-            ) : perfil?.cargo !== "admin" ? (
+            ) : !podeVerEquipe ? (
               <Navigate to="/" replace />
             ) : (
-              <Admin />
+              <Admin perfil={perfil} />
             )
           }
         />
