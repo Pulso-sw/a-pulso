@@ -33,6 +33,14 @@ function IconeCadeado() {
   );
 }
 
+function IconeTelefone() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <path d="M4 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L14 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 2 6a2 2 0 0 1 2-2Z" />
+    </svg>
+  );
+}
+
 function IconeOlho({ aberto }) {
   return aberto ? (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -49,17 +57,23 @@ function IconeOlho({ aberto }) {
 }
 
 export default function Login() {
-  const [modo, setModo] = useState("entrar"); // "entrar" | "cadastrar" | "recuperar"
+  // "entrar" | "cadastrar" | "confirmar" | "recuperar"
+  const [modo, setModo] = useState("entrar");
   const [email, setEmail] = useState(() => localStorage.getItem("a-pulso-email") || "");
   const [senha, setSenha] = useState("");
   const [nome, setNome] = useState("");
+  const [telefone, setTelefone] = useState("");
   const [cargo, setCargo] = useState("funcionario");
   const [categoria, setCategoria] = useState("clt");
+  const [codigo, setCodigo] = useState("");
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [senhaVisivel, setSenhaVisivel] = useState(false);
   const [manterConectado, setManterConectado] = useState(() => !!localStorage.getItem("a-pulso-email"));
+
+  // guarda os dados do cadastro enquanto aguarda a confirmação por e-mail
+  const [dadosPendentes, setDadosPendentes] = useState(null);
 
   useEffect(() => {
     setErro("");
@@ -68,7 +82,10 @@ export default function Login() {
 
   function traduzErro(msg) {
     if (msg.includes("Invalid login")) return "E-mail ou senha inválidos.";
+    if (msg.includes("Email not confirmed")) return "Confirme seu e-mail antes de entrar.";
     if (msg.includes("already registered")) return "Esse e-mail já tem cadastro. Tente entrar.";
+    if (msg.includes("Token has expired") || msg.includes("expired")) return "Código expirado. Peça um novo.";
+    if (msg.includes("Invalid token") || msg.includes("invalid")) return "Código inválido. Confira e tente de novo.";
     return msg;
   }
 
@@ -89,22 +106,55 @@ export default function Login() {
     e.preventDefault();
     setErro("");
     setCarregando(true);
-    const { data, error } = await supabase.auth.signUp({ email, password: senha });
+
+    const { error } = await supabase.auth.signUp({ email, password: senha });
     if (error) {
       setErro(traduzErro(error.message));
       setCarregando(false);
       return;
     }
+
+    // guarda os dados do perfil pra criar assim que o código for confirmado
+    setDadosPendentes({ nome, telefone, cargo, categoria: cargo === "funcionario" ? categoria : null });
+    setSucesso("");
+    setModo("confirmar");
+    setCarregando(false);
+  }
+
+  async function handleConfirmarCodigo(e) {
+    e.preventDefault();
+    setErro("");
+    setCarregando(true);
+
+    const { data, error } = await supabase.auth.verifyOtp({ email, token: codigo, type: "signup" });
+    if (error) {
+      setErro(traduzErro(error.message));
+      setCarregando(false);
+      return;
+    }
+
     const userId = data.user?.id;
-    if (userId) {
+    if (userId && dadosPendentes) {
       const { error: erroPerfil } = await supabase.from("perfis").insert({
         id: userId,
-        nome,
-        cargo,
-        categoria: cargo === "funcionario" ? categoria : null
+        nome: dadosPendentes.nome,
+        telefone: dadosPendentes.telefone,
+        cargo: dadosPendentes.cargo,
+        categoria: dadosPendentes.categoria
       });
       if (erroPerfil) setErro(erroPerfil.message);
+      // a partir daqui, um Database Webhook cuida de disparar o SMS de boas-vindas
     }
+    setCarregando(false);
+  }
+
+  async function handleReenviarCodigo() {
+    setErro("");
+    setSucesso("");
+    setCarregando(true);
+    const { error } = await supabase.auth.resend({ type: "signup", email });
+    if (error) setErro(traduzErro(error.message));
+    else setSucesso("Reenviamos o código para o seu e-mail.");
     setCarregando(false);
   }
 
@@ -124,6 +174,7 @@ export default function Login() {
   const titulos = {
     entrar: "Entrar",
     cadastrar: "Criar conta",
+    confirmar: "Confirme seu e-mail",
     recuperar: "Recuperar senha"
   };
 
@@ -134,13 +185,42 @@ export default function Login() {
         <p className="eyebrow">A Pulso</p>
         <h1 style={{ fontSize: "1.5rem", marginBottom: 4 }}>{titulos[modo]}</h1>
         <p style={{ color: "var(--ink-soft)", fontSize: "0.9rem", marginTop: 6, marginBottom: 24 }}>
-          {modo === "recuperar" ? "Informe seu e-mail cadastrado." : "Ponto simples pra empresas que estão crescendo."}
+          {modo === "recuperar" && "Informe seu e-mail cadastrado."}
+          {modo === "confirmar" && <>Enviamos um código de 6 dígitos para <strong>{email}</strong>.</>}
+          {(modo === "entrar" || modo === "cadastrar") && "Ponto simples pra empresas que estão crescendo."}
         </p>
 
         {erro && <div className="error-msg">{erro}</div>}
         {sucesso && <div className="success-msg">{sucesso}</div>}
 
-        {modo === "recuperar" ? (
+        {modo === "confirmar" && (
+          <form onSubmit={handleConfirmarCodigo}>
+            <div className="field">
+              <label htmlFor="codigo">Código de confirmação</label>
+              <input
+                id="codigo"
+                inputMode="numeric"
+                maxLength={6}
+                value={codigo}
+                onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ""))}
+                placeholder="000000"
+                style={{ textAlign: "center", fontFamily: "var(--font-mono)", fontSize: "1.3rem", letterSpacing: "0.3em" }}
+                required
+              />
+            </div>
+            <button className="btn btn-primary" style={{ width: "100%" }} disabled={carregando}>
+              {carregando ? "Confirmando..." : "Confirmar e entrar"}
+            </button>
+            <p className="hint">
+              Não recebeu?{" "}
+              <button type="button" className="link-btn" onClick={handleReenviarCodigo} disabled={carregando}>
+                Reenviar código
+              </button>
+            </p>
+          </form>
+        )}
+
+        {modo === "recuperar" && (
           <form onSubmit={handleRecuperar}>
             <div className="field field-icon">
               <label htmlFor="email">E-mail</label>
@@ -156,7 +236,9 @@ export default function Login() {
               </button>
             </p>
           </form>
-        ) : (
+        )}
+
+        {(modo === "entrar" || modo === "cadastrar") && (
           <form onSubmit={modo === "entrar" ? handleEntrar : handleCadastrar}>
             {modo === "cadastrar" && (
               <div className="field field-icon">
@@ -192,6 +274,21 @@ export default function Login() {
                 <IconeOlho aberto={senhaVisivel} />
               </button>
             </div>
+
+            {modo === "cadastrar" && (
+              <div className="field field-icon">
+                <label htmlFor="telefone">Celular (com DDD)</label>
+                <IconeTelefone />
+                <input
+                  id="telefone"
+                  type="tel"
+                  placeholder="(41) 99999-9999"
+                  value={telefone}
+                  onChange={(e) => setTelefone(e.target.value)}
+                  required
+                />
+              </div>
+            )}
 
             {modo === "entrar" && (
               <label className="checkbox-row">
@@ -266,7 +363,7 @@ export default function Login() {
           </form>
         )}
 
-        {modo !== "recuperar" && (
+        {(modo === "entrar" || modo === "cadastrar") && (
           <p className="hint">
             {modo === "entrar" ? "Ainda não tem conta? " : "Já tem conta? "}
             <button
