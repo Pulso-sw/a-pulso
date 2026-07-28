@@ -4,6 +4,9 @@ import { supabase } from "./supabaseClient";
 import Login from "./Login";
 import Dashboard from "./Dashboard";
 import Admin from "./Admin";
+import PainelAdmin from "./painel/PainelAdmin";
+import EmpresaFiliais from "./painel/EmpresaFiliais";
+import EmConstrucao from "./painel/EmConstrucao";
 
 function useTema() {
   const [tema, setTema] = useState(() => localStorage.getItem("a-pulso-tema") || "claro");
@@ -16,18 +19,14 @@ function useTema() {
   return [tema, setTema];
 }
 
-function Topbar({ perfil, onSair, tema, onAlternarTema }) {
+function Topbar({ onSair, tema, onAlternarTema }) {
   const location = useLocation();
-  const podeVerEquipe = perfil?.cargo === "administrador" || perfil?.cargo === "rh";
   return (
     <div className="topbar">
       <Link to="/" className="brand"><span className="dot" /> A Pulso</Link>
       <nav style={{ display: "flex", alignItems: "center", gap: 16 }}>
         <div className="nav-tabs" style={{ marginBottom: 0 }}>
           <Link className={location.pathname === "/" ? "active" : ""} to="/">Meu ponto</Link>
-          {podeVerEquipe && (
-            <Link className={location.pathname === "/equipe" ? "active" : ""} to="/equipe">Equipe</Link>
-          )}
         </div>
         <button
           className="theme-toggle"
@@ -60,12 +59,39 @@ export default function App() {
 
   useEffect(() => {
     if (!sessao) return;
-    supabase
-      .from("perfis")
-      .select("*")
-      .eq("id", sessao.user.id)
-      .maybeSingle()
-      .then(({ data }) => setPerfil(data));
+
+    async function carregarOuCriarPerfil() {
+      const { data: perfilExistente } = await supabase
+        .from("perfis")
+        .select("*")
+        .eq("id", sessao.user.id)
+        .maybeSingle();
+
+      if (perfilExistente) {
+        setPerfil(perfilExistente);
+        return;
+      }
+
+      // não tem perfil ainda: se a pessoa confirmou clicando no link do e-mail
+      // (em vez de digitar o código), os dados do cadastro ficaram salvos aqui
+      const metadados = sessao.user.user_metadata;
+      if (metadados?.nome) {
+        const { data: perfilCriado } = await supabase
+          .from("perfis")
+          .insert({
+            id: sessao.user.id,
+            nome: metadados.nome,
+            telefone: metadados.telefone,
+            cargo: metadados.cargo,
+            categoria: metadados.categoria
+          })
+          .select()
+          .maybeSingle();
+        setPerfil(perfilCriado);
+      }
+    }
+
+    carregarOuCriarPerfil();
   }, [sessao]);
 
   if (sessao === undefined) return <div className="page">Carregando...</div>;
@@ -82,11 +108,12 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      {sessao && perfil && (
-        <Topbar perfil={perfil} onSair={handleSair} tema={tema} onAlternarTema={alternarTema} />
+      {sessao && perfil && !podeVerEquipe && (
+        <Topbar onSair={handleSair} tema={tema} onAlternarTema={alternarTema} />
       )}
       <Routes>
         <Route path="/login" element={sessao ? <Navigate to="/" replace /> : <Login />} />
+
         <Route
           path="/"
           element={
@@ -101,18 +128,26 @@ export default function App() {
             )
           }
         />
+
         <Route
           path="/equipe"
           element={
             !sessao ? (
               <Navigate to="/login" replace />
+            ) : !perfil ? (
+              <div className="page">Preparando seu perfil...</div>
             ) : !podeVerEquipe ? (
               <Navigate to="/" replace />
             ) : (
-              <Admin perfil={perfil} />
+              <PainelAdmin perfil={perfil} onSair={handleSair} />
             )
           }
-        />
+        >
+          <Route index element={<Admin perfil={perfil} />} />
+          <Route path="empresa" element={<EmpresaFiliais />} />
+          <Route path="funcionarios" element={<EmConstrucao titulo="Cadastro funcionário" />} />
+          <Route path="escalas" element={<EmConstrucao titulo="Cadastro escala de horário" />} />
+        </Route>
       </Routes>
     </div>
   );
