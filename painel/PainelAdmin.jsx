@@ -39,11 +39,20 @@ function IconeEquipe() {
   );
 }
 
+function IconeSolicitacoes() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 4h16v13H7l-3 3z" />
+      <path d="M8 9h8M8 13h5" />
+    </svg>
+  );
+}
+
 const ITENS_MENU = [
-  { caminho: "/equipe", label: "Equipe", icone: IconeEquipe },
-  { caminho: "/equipe/empresa", label: "Cadastro Empresa e filiais", icone: IconePredio },
-  { caminho: "/equipe/funcionarios", label: "Cadastro funcionário", icone: IconePessoa },
-  { caminho: "/equipe/escalas", label: "Cadastro escala de horário", icone: IconeRelogio }
+  { caminho: "/equipe/empresa", label: "Cadastro de Empresas", icone: IconePredio },
+  { caminho: "/equipe/funcionarios", label: "Cadastro de Funcionários", icone: IconePessoa },
+  { caminho: "/equipe/escalas", label: "Cadastro de Horários", icone: IconeRelogio },
+  { caminho: "/equipe/solicitacoes", label: "Solicitações", icone: IconeSolicitacoes }
 ];
 
 export default function PainelAdmin({ perfil, onSair }) {
@@ -51,28 +60,26 @@ export default function PainelAdmin({ perfil, onSair }) {
 
   return (
     <div className="admin-shell">
-      <aside className="admin-sidebar">
+      <header className="admin-topbar">
         <Link to="/" className="brand"><span className="dot" /> A Pulso</Link>
-        {ITENS_MENU.map((item) => {
-          const Icone = item.icone;
-          const ativo = location.pathname === item.caminho;
-          return (
-            <Link
-              key={item.caminho}
-              to={item.caminho}
-              className={`admin-nav-item${ativo ? " active" : ""}`}
-            >
-              <Icone />
-              {item.label}
-            </Link>
-          );
-        })}
-        <div className="admin-sidebar-footer">
-          <button className="btn btn-ghost" style={{ width: "100%" }} onClick={onSair}>
-            Sair
-          </button>
-        </div>
-      </aside>
+        <nav className="admin-topbar-nav">
+          {ITENS_MENU.map((item) => {
+            const Icone = item.icone;
+            const ativo = location.pathname === item.caminho;
+            return (
+              <Link
+                key={item.caminho}
+                to={item.caminho}
+                className={`admin-topbar-item${ativo ? " active" : ""}`}
+              >
+                <Icone />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+        <button className="btn btn-ghost" onClick={onSair}>Sair</button>
+      </header>
       <div className="admin-content">
         <Outlet context={{ perfil }} />
       </div>
