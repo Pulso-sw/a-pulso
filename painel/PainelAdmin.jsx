@@ -49,6 +49,7 @@ function IconeSolicitacoes() {
 }
 
 const ITENS_MENU = [
+  { caminho: "/equipe/visao-equipe", label: "Visão da Equipe", icone: IconeEquipe },
   { caminho: "/equipe/empresa", label: "Cadastro de Empresas", icone: IconePredio },
   { caminho: "/equipe/funcionarios", label: "Cadastro de Funcionários", icone: IconePessoa },
   { caminho: "/equipe/escalas", label: "Cadastro de Horários", icone: IconeRelogio },
