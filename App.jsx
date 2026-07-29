@@ -144,6 +144,7 @@ export default function App() {
           }
         >
           <Route index element={<Admin perfil={perfil} />} />
+          <Route path="solicitacoes" element={<EmConstrucao titulo="Solicitações" />} />
           <Route path="empresa" element={<EmpresaFiliais />} />
           <Route path="funcionarios" element={<EmConstrucao titulo="Cadastro funcionário" />} />
           <Route path="escalas" element={<EmConstrucao titulo="Cadastro escala de horário" />} />
