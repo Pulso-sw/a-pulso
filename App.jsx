@@ -7,6 +7,7 @@ import Admin from "./Admin";
 import PainelAdmin from "./painel/PainelAdmin";
 import EmpresaFiliais from "./painel/EmpresaFiliais";
 import EmConstrucao from "./painel/EmConstrucao";
+import BoasVindas from "./painel/BoasVindas";
 
 function useTema() {
   const [tema, setTema] = useState(() => localStorage.getItem("a-pulso-tema") || "claro");
@@ -143,11 +144,12 @@ export default function App() {
             )
           }
         >
-          <Route index element={<Admin perfil={perfil} />} />
-          <Route path="solicitacoes" element={<EmConstrucao titulo="Solicitações" />} />
+          <Route index element={<BoasVindas />} />
+          <Route path="visao-equipe" element={<Admin perfil={perfil} />} />
           <Route path="empresa" element={<EmpresaFiliais />} />
           <Route path="funcionarios" element={<EmConstrucao titulo="Cadastro funcionário" />} />
           <Route path="escalas" element={<EmConstrucao titulo="Cadastro escala de horário" />} />
+          <Route path="solicitacoes" element={<EmConstrucao titulo="Solicitações" />} />
         </Route>
       </Routes>
     </div>
