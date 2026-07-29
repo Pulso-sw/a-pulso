@@ -736,3 +736,66 @@ tr:last-child td { border-bottom: none; }
   .admin-sidebar { width: 100%; flex-direction: row; overflow-x: auto; padding: 12px; }
   .admin-content { padding: 20px; }
 }
+/* Painel Admin — barra horizontal no topo */
+.admin-shell {
+  flex-direction: column;
+}
+
+.admin-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 32px;
+  background: var(--admin-sidebar);
+  border-bottom: 1px solid var(--admin-line);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.admin-topbar .brand {
+  color: var(--admin-texto);
+  font-size: 1.05rem;
+}
+
+.admin-topbar .brand .dot {
+  background: var(--admin-dourado);
+  box-shadow: 0 0 0 4px var(--admin-dourado-soft);
+}
+
+.admin-topbar-nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.admin-topbar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: var(--admin-texto-soft);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-topbar-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--admin-texto);
+}
+
+.admin-topbar-item.active {
+  background: var(--admin-dourado-soft);
+  color: var(--admin-dourado);
+  font-weight: 600;
+}
+
+.admin-topbar-item svg {
+  flex-shrink: 0;
+}
