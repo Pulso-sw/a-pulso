@@ -826,3 +826,43 @@ tr:last-child td { border-bottom: none; }
 @media (prefers-reduced-motion: reduce) {
   .ecg-track { animation: none; }
 }
+/* Visão da Equipe — dashboard 70/30 */
+.equipe-dashboard-grid {
+  display: grid;
+  grid-template-columns: 7fr 3fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+.equipe-col-principal,
+.equipe-col-lateral {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.equipe-col-principal .card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.card-atalho {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.15s ease;
+}
+
+.card-atalho:hover {
+  border-color: var(--pulso);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 900px) {
+  .equipe-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
