@@ -274,3 +274,117 @@ export default function Login() {
                 minLength={6}
                 required
               />
+              <button
+                type="button"
+                className="eye-toggle"
+                onClick={() => setSenhaVisivel((v) => !v)}
+                aria-label={senhaVisivel ? "Ocultar senha" : "Mostrar senha"}
+              >
+                <IconeOlho aberto={senhaVisivel} />
+              </button>
+            </div>
+
+            {modo === "cadastrar" && (
+              <div className="field field-icon">
+                <label htmlFor="telefone">Celular (com DDD)</label>
+                <IconeTelefone />
+                <input
+                  id="telefone"
+                  type="tel"
+                  placeholder="(41) 99999-9999"
+                  value={telefone}
+                  onChange={(e) => setTelefone(e.target.value)}
+                  required
+                />
+              </div>
+            )}
+
+            {modo === "entrar" && (
+              <label className="checkbox-row">
+                <input
+                  type="checkbox"
+                  checked={manterConectado}
+                  onChange={(e) => setManterConectado(e.target.checked)}
+                />
+                Manter conectado
+              </label>
+            )}
+
+            {modo === "cadastrar" && (
+              <>
+                <div className="field">
+                  <label>Qual é o seu perfil?</label>
+                  {PERFIS.map((p) => (
+                    <label
+                      key={p.valor}
+                      style={{
+                        display: "flex", alignItems: "flex-start", gap: 8, fontSize: "0.85rem",
+                        padding: "10px 12px", marginBottom: 6, borderRadius: 10,
+                        border: cargo === p.valor ? "1.5px solid var(--pulso)" : "1px solid var(--line)",
+                        cursor: "pointer"
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        name="cargo"
+                        value={p.valor}
+                        checked={cargo === p.valor}
+                        onChange={(e) => setCargo(e.target.value)}
+                        style={{ marginTop: 3 }}
+                      />
+                      <span>
+                        <strong>{p.label}</strong>
+                        <div style={{ color: "var(--ink-soft)" }}>{p.desc}</div>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+
+                {cargo === "funcionario" && (
+                  <div className="field">
+                    <label htmlFor="categoria">Categoria</label>
+                    <select
+                      id="categoria"
+                      value={categoria}
+                      onChange={(e) => setCategoria(e.target.value)}
+                      style={{ padding: "12px 14px", borderRadius: 10, border: "1px solid var(--line)", fontSize: "0.95rem" }}
+                    >
+                      {CATEGORIAS.map((c) => (
+                        <option key={c.valor} value={c.valor}>{c.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </>
+            )}
+
+            <button className="btn btn-primary" style={{ width: "100%" }} disabled={carregando}>
+              {carregando ? "Aguarde..." : modo === "entrar" ? "Entrar" : "Criar conta"}
+            </button>
+
+            {modo === "entrar" && (
+              <p className="hint">
+                <button type="button" className="link-btn" onClick={() => setModo("recuperar")}>
+                  Esqueceu a senha?
+                </button>
+              </p>
+            )}
+          </form>
+        )}
+
+        {(modo === "entrar" || modo === "cadastrar") && (
+          <p className="hint">
+            {modo === "entrar" ? "Ainda não tem conta? " : "Já tem conta? "}
+            <button
+              type="button"
+              onClick={() => { setModo(modo === "entrar" ? "cadastrar" : "entrar"); setErro(""); }}
+              style={{ background: "none", border: "none", color: "var(--pulso)", fontWeight: 600, cursor: "pointer", padding: 0 }}
+            >
+              {modo === "entrar" ? "Criar conta" : "Entrar"}
+            </button>
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
