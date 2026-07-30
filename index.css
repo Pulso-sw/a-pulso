@@ -1,4 +1,27 @@
+/* Traçado ECG animado — tela inicial do Admin */
 .ecg-trace-wrap {
   width: min(900px, 88%);
   overflow: hidden;
+}
+
+.ecg-track {
+  display: flex;
+  width: max-content;
+  animation: ecg-scroll 7s linear infinite;
+}
+
+.ecg-svg {
+  width: 450px;
+  height: 130px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 6px rgba(58, 90, 255, 0.35));
+}
+
+@keyframes ecg-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-450px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ecg-track { animation: none; }
 }
