@@ -8,6 +8,7 @@ import PainelAdmin from "./painel/PainelAdmin";
 import EmpresaFiliais from "./painel/EmpresaFiliais";
 import EmConstrucao from "./painel/EmConstrucao";
 import BoasVindas from "./painel/BoasVindas";
+import RedefinirSenha from "./RedefinirSenha";
 
 function useTema() {
   const [tema, setTema] = useState(() => localStorage.getItem("a-pulso-tema") || "claro");
@@ -114,6 +115,7 @@ export default function App() {
       )}
       <Routes>
         <Route path="/login" element={sessao ? <Navigate to="/" replace /> : <Login />} />
+        <Route path="/redefinir-senha" element={<RedefinirSenha />} />
 
         <Route
           path="/"
@@ -147,11 +149,4 @@ export default function App() {
           <Route index element={<BoasVindas />} />
           <Route path="visao-equipe" element={<Admin perfil={perfil} />} />
           <Route path="empresa" element={<EmpresaFiliais />} />
-          <Route path="funcionarios" element={<EmConstrucao titulo="Cadastro funcionário" />} />
-          <Route path="escalas" element={<EmConstrucao titulo="Cadastro escala de horário" />} />
-          <Route path="solicitacoes" element={<EmConstrucao titulo="Solicitações" />} />
-        </Route>
-      </Routes>
-    </div>
-  );
-}
+          <Route path="funcionarios" element={<EmConstrucao titulo="Cadastro
