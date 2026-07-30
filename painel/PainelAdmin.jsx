@@ -1,4 +1,5 @@
 import { Link, useLocation, Outlet } from "react-router-dom";
+import BotaoVoltar from "./BotaoVoltar";
 
 function IconePredio() {
   return (
@@ -70,6 +71,7 @@ const ITENS_MENU = [
 
 export default function PainelAdmin({ perfil, onSair }) {
   const location = useLocation();
+  const mostrarVoltar = location.pathname !== "/equipe";
 
   return (
     <div className="admin-shell">
@@ -94,6 +96,7 @@ export default function PainelAdmin({ perfil, onSair }) {
         <button className="btn btn-ghost" onClick={onSair}>Sair</button>
       </header>
       <div className="admin-content">
+        {mostrarVoltar && <BotaoVoltar />}
         <Outlet context={{ perfil }} />
       </div>
     </div>
