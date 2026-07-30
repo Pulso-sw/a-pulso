@@ -866,3 +866,7 @@ tr:last-child td { border-bottom: none; }
     grid-template-columns: 1fr;
   }
 }
+/* Botão Voltar — telas internas do painel Admin */
+.admin-btn-voltar {
+  margin-bottom: 20px;
+}
