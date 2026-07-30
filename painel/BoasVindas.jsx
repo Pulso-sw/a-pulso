@@ -3,7 +3,7 @@ export default function BoasVindas() {
     <div>
       <p className="admin-eyebrow">Painel Administrativo</p>
       <h1 className="admin-titulo">Bem-vindo à A Pulso</h1>
-      <div style={{ minHeight: "50vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div className="ecg-full-bleed" style={{ minHeight: "50vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div className="ecg-trace-wrap">
           <div className="ecg-track">
             <svg className="ecg-svg" viewBox="0 0 450 130" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
