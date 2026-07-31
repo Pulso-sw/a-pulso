@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { supabase } from "../supabaseClient";
+import ConfirmarExclusao from "./ConfirmarExclusao";
 
 const RAMOS_ATIVIDADE = [
   "Comércio",
@@ -41,6 +42,11 @@ export default function EmpresaFiliais() {
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
+
+  const [excluirEmpresaAberto, setExcluirEmpresaAberto] = useState(false);
+  const [excluindoEmpresa, setExcluindoEmpresa] = useState(false);
+  const [filialParaExcluir, setFilialParaExcluir] = useState(null);
+  const [excluindoFilial, setExcluindoFilial] = useState(false);
 
   useEffect(() => {
     async function carregar() {
@@ -89,10 +95,40 @@ export default function EmpresaFiliais() {
         .insert({ cnpj, nome, ramo_atividade: ramoAtividade, criado_por: perfil.id })
         .select()
         .maybeSingle();
-      if (error) setErro(error.message);
-      else { setEmpresa(data); setSucesso("Empresa cadastrada com sucesso."); }
+      if (error) {
+        setErro(error.message);
+      } else {
+        setEmpresa(data);
+        setSucesso("Empresa cadastrada com sucesso.");
+        // vincula automaticamente quem criou a empresa a ela
+        await supabase.from("perfis").update({ empresa_id: data.id }).eq("id", perfil.id);
+      }
     }
     setSalvando(false);
+  }
+
+  async function handleExcluirEmpresa() {
+    setExcluindoEmpresa(true);
+    setErro("");
+    const { error } = await supabase.from("empresas").delete().eq("id", empresa.id);
+    setExcluindoEmpresa(false);
+    setExcluirEmpresaAberto(false);
+
+    if (error) {
+      if (error.code === "23503") {
+        setErro("Não é possível excluir: existem colaboradores vinculados a esta empresa.");
+      } else {
+        setErro("Não foi possível excluir a empresa. Tente novamente.");
+      }
+      return;
+    }
+
+    setEmpresa(null);
+    setCnpj("");
+    setNome("");
+    setRamoAtividade(RAMOS_ATIVIDADE[0]);
+    setFiliais([]);
+    setSucesso("Empresa excluída com sucesso.");
   }
 
   async function handleAdicionarFilial(e) {
@@ -110,9 +146,18 @@ export default function EmpresaFiliais() {
     setCnpjFilial("");
   }
 
-  async function handleRemoverFilial(id) {
-    await supabase.from("filiais").delete().eq("id", id);
-    setFiliais((atual) => atual.filter((f) => f.id !== id));
+  async function handleConfirmarRemoverFilial() {
+    if (!filialParaExcluir) return;
+    setExcluindoFilial(true);
+    const { error } = await supabase.from("filiais").delete().eq("id", filialParaExcluir.id);
+    setExcluindoFilial(false);
+    if (error) {
+      setErro("Não foi possível remover a filial. Tente novamente.");
+    } else {
+      setFiliais((atual) => atual.filter((f) => f.id !== filialParaExcluir.id));
+      setSucesso("Filial removida com sucesso.");
+    }
+    setFilialParaExcluir(null);
   }
 
   if (carregando) return <p style={{ color: "var(--admin-texto-soft)" }}>Carregando...</p>;
@@ -153,9 +198,21 @@ export default function EmpresaFiliais() {
             <input id="nomeEmpresa" value={nome} onChange={(e) => setNome(e.target.value)} required />
           </div>
 
-          <button className="btn btn-dourado" disabled={salvando}>
-            {salvando ? "Salvando..." : empresa ? "Salvar alterações" : "Cadastrar empresa"}
-          </button>
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <button className="btn btn-dourado" disabled={salvando}>
+              {salvando ? "Salvando..." : empresa ? "Salvar alterações" : "Cadastrar empresa"}
+            </button>
+
+            {empresa && (
+              <button
+                type="button"
+                className="admin-remover"
+                onClick={() => setExcluirEmpresaAberto(true)}
+              >
+                Excluir empresa
+              </button>
+            )}
+          </div>
         </form>
       </div>
 
@@ -198,7 +255,7 @@ export default function EmpresaFiliais() {
                     {f.nome}
                     {f.cnpj && <small>{f.cnpj}</small>}
                   </span>
-                  <button className="admin-remover" onClick={() => handleRemoverFilial(f.id)}>
+                  <button className="admin-remover" onClick={() => setFilialParaExcluir(f)}>
                     Remover
                   </button>
                 </div>
@@ -207,6 +264,24 @@ export default function EmpresaFiliais() {
           )}
         </>
       )}
+
+      <ConfirmarExclusao
+        aberto={excluirEmpresaAberto}
+        titulo="Excluir empresa"
+        mensagem="Tem certeza que deseja excluir esta empresa? Esta ação não poderá ser desfeita."
+        confirmando={excluindoEmpresa}
+        onCancelar={() => setExcluirEmpresaAberto(false)}
+        onConfirmar={handleExcluirEmpresa}
+      />
+
+      <ConfirmarExclusao
+        aberto={!!filialParaExcluir}
+        titulo="Remover filial"
+        mensagem="Tem certeza que deseja remover esta filial? Esta ação não poderá ser desfeita."
+        confirmando={excluindoFilial}
+        onCancelar={() => setFilialParaExcluir(null)}
+        onConfirmar={handleConfirmarRemoverFilial}
+      />
     </div>
   );
 }
