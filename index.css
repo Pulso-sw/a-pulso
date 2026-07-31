@@ -920,3 +920,33 @@ tr:last-child td { border-bottom: none; }
     padding: 60px 24px;
   }
 }
+/* Imagem de fundo da Hero */
+.admin-hero {
+  position: relative;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+}
+
+.admin-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  filter: blur(3px) brightness(35%);
+  transform: scale(1.05);
+  z-index: 0;
+}
+
+.admin-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: #071A2F;
+  opacity: 0.75;
+  z-index: 1;
+}
+
+.admin-hero-content {
+  position: relative;
+  z-index: 2;
+}
