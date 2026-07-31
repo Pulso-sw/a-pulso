@@ -2,7 +2,7 @@ export default function BoasVindas() {
   return (
     <div
       className="admin-hero"
-      style={{ backgroundImage: "url(/hero-bg.png)" }}
+      style={{ backgroundImage: "url(/Imagemdefundo.png)" }}
     >
       <div className="admin-hero-overlay" />
       <div className="admin-hero-content">
