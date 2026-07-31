@@ -895,3 +895,28 @@ tr:last-child td { border-bottom: none; }
 .modal-caixa h3 {
   color: var(--admin-texto);
 }
+/* Hero — tela inicial do painel Admin */
+.admin-hero {
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+  padding: 0 80px;
+}
+
+.admin-hero-content {
+  max-width: 620px;
+}
+
+.admin-hero-subtitulo {
+  font-size: 1.05rem;
+  color: var(--admin-texto-soft);
+  line-height: 1.6;
+  max-width: 520px;
+}
+
+@media (max-width: 640px) {
+  .admin-hero {
+    min-height: auto;
+    padding: 60px 24px;
+  }
+}
