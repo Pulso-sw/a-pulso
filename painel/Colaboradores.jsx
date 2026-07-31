@@ -37,6 +37,7 @@ function calcularHoras(registros) {
 export default function Colaboradores({ perfil }) {
   const [colaboradores, setColaboradores] = useState([]);
   const [erro, setErro] = useState("");
+  const [sucesso, setSucesso] = useState("");
   const [carregando, setCarregando] = useState(true);
 
   const [ajusteUsuario, setAjusteUsuario] = useState("");
@@ -72,6 +73,20 @@ export default function Colaboradores({ perfil }) {
 
   useEffect(() => { carregarColaboradores(); }, []);
 
+  async function handleAlterarStatus(colaboradorId, novoStatus) {
+    setErro("");
+    setSucesso("");
+    const { error } = await supabase.from("perfis").update({ status: novoStatus }).eq("id", colaboradorId);
+    if (error) {
+      setErro("Não foi possível atualizar o status. Tente novamente.");
+      return;
+    }
+    setColaboradores((atual) =>
+      atual.map((c) => (c.id === colaboradorId ? { ...c, status: novoStatus } : c))
+    );
+    setSucesso("Status atualizado.");
+  }
+
   async function registrarAjuste(e) {
     e.preventDefault();
     if (!ajusteUsuario || !ajusteDataHora) return;
@@ -94,11 +109,16 @@ export default function Colaboradores({ perfil }) {
       <h1 style={{ fontSize: "1.6rem", marginBottom: 24 }}>Colaboradores</h1>
 
       {erro && <div className="error-msg">{erro}</div>}
+      {sucesso && <div className="success-msg">{sucesso}</div>}
 
       <div className="card" style={{ marginBottom: 20 }}>
         <h3 style={{ fontSize: "1rem", marginBottom: 16 }}>Colaboradores</h3>
         <table>
-          <thead><tr><th>Nome</th><th>Perfil</th><th>Categoria</th><th>Horas na semana</th><th>Status</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Nome</th><th>Perfil</th><th>Categoria</th><th>Horas na semana</th><th>Status</th><th>Situação</th>
+            </tr>
+          </thead>
           <tbody>
             {colaboradores.map((c) => (
               <tr key={c.id}>
@@ -110,6 +130,18 @@ export default function Colaboradores({ perfil }) {
                   <span className={`status-pill ${c.ativo ? "on" : "off"}`}>
                     <span className="dot" />{c.ativo ? "Ativo" : "Parado"}
                   </span>
+                </td>
+                <td>
+                  <select
+                    value={c.status || "ativo"}
+                    onChange={(e) => handleAlterarStatus(c.id, e.target.value)}
+                    style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.82rem" }}
+                  >
+                    <option value="ativo">Ativo</option>
+                    <option value="afastado">Afastado</option>
+                    <option value="desligado">Desligado</option>
+                    <option value="inativo">Inativo</option>
+                  </select>
                 </td>
               </tr>
             ))}
