@@ -870,3 +870,28 @@ tr:last-child td { border-bottom: none; }
 .admin-btn-voltar {
   margin-bottom: 20px;
 }
+/* Modal de confirmação de exclusão */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.modal-caixa {
+  background: var(--admin-panel);
+  border: 1px solid var(--admin-line);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: var(--shadow-raised);
+}
+
+.modal-caixa h3 {
+  color: var(--admin-texto);
+}
