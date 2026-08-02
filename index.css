@@ -980,8 +980,8 @@ tr:last-child td { border-bottom: none; }
 }
 
 @keyframes hero-ecg-scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(calc(-1 * var(--ecg-w))); }
+  from { transform: translateX(calc(-1 * var(--ecg-w))); }
+  to { transform: translateX(0); }
 }
 
 @media (max-width: 900px) {
