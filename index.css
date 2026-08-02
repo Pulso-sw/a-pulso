@@ -950,3 +950,53 @@ tr:last-child td { border-bottom: none; }
   position: relative;
   z-index: 2;
 }
+
+/* Traçado ECG ao lado do título da Hero */
+.admin-hero-titulo-linha {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: nowrap;
+}
+
+.hero-ecg-wrap {
+  --ecg-w: 220px;
+  width: var(--ecg-w);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.hero-ecg-track {
+  display: flex;
+  width: max-content;
+  animation: hero-ecg-scroll 9s linear infinite;
+}
+
+.hero-ecg-svg {
+  width: var(--ecg-w);
+  height: 34px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 3px rgba(58, 90, 255, 0.35));
+}
+
+@keyframes hero-ecg-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-1 * var(--ecg-w))); }
+}
+
+@media (max-width: 900px) {
+  .hero-ecg-wrap { --ecg-w: 160px; }
+}
+
+@media (max-width: 640px) {
+  .admin-hero-titulo-linha {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .hero-ecg-wrap { --ecg-w: 140px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-ecg-track { animation: none; }
+}
