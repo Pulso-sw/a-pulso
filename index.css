@@ -562,10 +562,10 @@ tr:last-child td { border-bottom: none; }
    Painel Admin/RH — tema claro moderno
    ========================================================= */
 :root {
-  --admin-bg: #F5F7FA;
+  --admin-bg: #ECEEF8;
   --admin-sidebar: #FFFFFF;
   --admin-panel: #FFFFFF;
-  --admin-line: #E8ECF4;
+  --admin-line: #D8DCF0;
   --admin-texto: #111827;
   --admin-texto-soft: #6B7280;
   --admin-dourado: #3A5AFF;
@@ -1014,7 +1014,7 @@ tr:last-child td { border-bottom: none; }
 
 .bv-corpo {
   flex: 1;
-  background: #F5F7FA;
+  background: #ECEEF8;
   padding: 52px 48px 40px;
   display: flex;
   flex-direction: column;
