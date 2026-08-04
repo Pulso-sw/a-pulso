@@ -10,6 +10,7 @@ import EmConstrucao from "./painel/EmConstrucao";
 import BoasVindas from "./painel/BoasVindas";
 import Colaboradores from "./painel/Colaboradores";
 import Solicitacoes from "./painel/Solicitacoes";
+import CadastroFuncionarios from "./painel/CadastroFuncionarios";
 import RedefinirSenha from "./RedefinirSenha";
 
 function useTema() {
@@ -152,7 +153,7 @@ export default function App() {
           <Route path="visao-equipe" element={<Admin perfil={perfil} />} />
           <Route path="colaboradores" element={<Colaboradores perfil={perfil} />} />
           <Route path="empresa" element={<EmpresaFiliais />} />
-          <Route path="funcionarios" element={<EmConstrucao titulo="Cadastro funcionário" />} />
+          <Route path="funcionarios" element={<CadastroFuncionarios />} />
           <Route path="escalas" element={<EmConstrucao titulo="Cadastro escala de horário" />} />
           <Route path="solicitacoes" element={<Solicitacoes perfil={perfil} />} />
         </Route>
