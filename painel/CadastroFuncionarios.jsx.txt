@@ -1,0 +1,307 @@
+import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
+import { supabase } from "../supabaseClient";
+
+function formatarCpf(valor) {
+  const numeros = valor.replace(/\D/g, "").slice(0, 11);
+  return numeros
+    .replace(/^(\d{3})(\d)/, "$1.$2")
+    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d{1,2})$/, ".$1-$2");
+}
+
+function formatarPis(valor) {
+  const numeros = valor.replace(/\D/g, "").slice(0, 11);
+  return numeros
+    .replace(/^(\d{3})(\d)/, "$1.$2")
+    .replace(/^(\d{3})\.(\d{5})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{2})(\d{1})$/, ".$1-$2");
+}
+
+export default function CadastroFuncionarios() {
+  const { perfil } = useOutletContext();
+
+  const [empresas, setEmpresas] = useState([]);
+  const [carregandoEmpresas, setCarregandoEmpresas] = useState(true);
+
+  const [funcionarios, setFuncionarios] = useState([]);
+  const [carregandoLista, setCarregandoLista] = useState(true);
+
+  const [empresaId, setEmpresaId] = useState("");
+  const [nome, setNome] = useState("");
+  const [cargo, setCargo] = useState("");
+  const [sexo, setSexo] = useState("feminino");
+  const [idade, setIdade] = useState("");
+  const [rg, setRg] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [naoPossuiCnh, setNaoPossuiCnh] = useState(false);
+  const [cnh, setCnh] = useState("");
+  const [ctps, setCtps] = useState("");
+  const [pis, setPis] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [email, setEmail] = useState("");
+  const [endereco, setEndereco] = useState("");
+
+  const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState("");
+  const [sucesso, setSucesso] = useState("");
+
+  useEffect(() => {
+    async function carregarEmpresas() {
+      const { data } = await supabase
+        .from("empresas")
+        .select("id, nome, cnpj")
+        .order("nome");
+      setEmpresas(data || []);
+      if (data && data.length) setEmpresaId(data[0].id);
+      setCarregandoEmpresas(false);
+    }
+    carregarEmpresas();
+  }, []);
+
+  async function carregarFuncionarios(idEmpresa) {
+    setCarregandoLista(true);
+    const { data } = await supabase
+      .from("funcionarios")
+      .select("*")
+      .eq("empresa_id", idEmpresa)
+      .order("criado_em", { ascending: false });
+    setFuncionarios(data || []);
+    setCarregandoLista(false);
+  }
+
+  useEffect(() => {
+    if (empresaId) carregarFuncionarios(empresaId);
+  }, [empresaId]);
+
+  async function handleSalvar(e) {
+    e.preventDefault();
+    setErro("");
+    setSucesso("");
+    setSalvando(true);
+
+    const { error } = await supabase.from("funcionarios").insert({
+      empresa_id: empresaId,
+      nome,
+      cargo,
+      sexo,
+      idade: idade ? Number(idade) : null,
+      rg,
+      cpf,
+      cnh: naoPossuiCnh ? null : cnh,
+      ctps,
+      pis,
+      telefone,
+      email,
+      endereco,
+      criado_por: perfil.id
+    });
+
+    if (error) {
+      setErro(error.message);
+      setSalvando(false);
+      return;
+    }
+
+    setSucesso("Funcionário cadastrado com sucesso.");
+    setNome("");
+    setCargo("");
+    setSexo("feminino");
+    setIdade("");
+    setRg("");
+    setCpf("");
+    setNaoPossuiCnh(false);
+    setCnh("");
+    setCtps("");
+    setPis("");
+    setTelefone("");
+    setEmail("");
+    setEndereco("");
+    setSalvando(false);
+    await carregarFuncionarios(empresaId);
+  }
+
+  if (carregandoEmpresas) {
+    return <p style={{ color: "var(--admin-texto-soft)" }}>Carregando...</p>;
+  }
+
+  if (empresas.length === 0) {
+    return (
+      <div>
+        <p className="admin-eyebrow">Cadastro de funcionários</p>
+        <h1 className="admin-titulo">Cadastro de funcionários</h1>
+        <div className="painel-azul">
+          <p style={{ color: "var(--admin-texto)" }}>
+            Nenhuma empresa cadastrada ainda. Cadastre uma empresa primeiro para poder cadastrar funcionários.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <p className="admin-eyebrow">Cadastro de funcionários</p>
+      <h1 className="admin-titulo">Cadastro de funcionários</h1>
+
+      <div className="painel-azul" style={{ marginBottom: 24 }}>
+        {erro && <div className="error-msg">{erro}</div>}
+        {sucesso && <div className="success-msg">{sucesso}</div>}
+
+        <form onSubmit={handleSalvar}>
+          <div className="field">
+            <label htmlFor="empresaId">Vincular à empresa</label>
+            <select id="empresaId" value={empresaId} onChange={(e) => setEmpresaId(e.target.value)} required>
+              {empresas.map((emp) => (
+                <option key={emp.id} value={emp.id}>{emp.nome} — {emp.cnpj}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="field">
+            <label htmlFor="nome">Nome completo do funcionário</label>
+            <input id="nome" value={nome} onChange={(e) => setNome(e.target.value)} required />
+          </div>
+
+          <div className="grid-2">
+            <div className="field">
+              <label htmlFor="cargo">Cargo</label>
+              <input id="cargo" value={cargo} onChange={(e) => setCargo(e.target.value)} required />
+            </div>
+            <div className="field">
+              <label htmlFor="sexo">Sexo</label>
+              <select id="sexo" value={sexo} onChange={(e) => setSexo(e.target.value)} required>
+                <option value="feminino">Feminino</option>
+                <option value="masculino">Masculino</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="field" style={{ maxWidth: 160 }}>
+            <label htmlFor="idade">Idade</label>
+            <input
+              id="idade"
+              type="number"
+              min="14"
+              max="120"
+              value={idade}
+              onChange={(e) => setIdade(e.target.value)}
+              required
+            />
+          </div>
+
+          <h3 style={{ fontSize: "0.95rem", color: "var(--admin-texto)", margin: "8px 0 12px" }}>
+            Documentos
+          </h3>
+
+          <div className="grid-2">
+            <div className="field">
+              <label htmlFor="rg">RG</label>
+              <input id="rg" value={rg} onChange={(e) => setRg(e.target.value)} placeholder="00.000.000-0" required />
+            </div>
+            <div className="field">
+              <label htmlFor="cpf">CPF</label>
+              <input
+                id="cpf"
+                value={cpf}
+                onChange={(e) => setCpf(formatarCpf(e.target.value))}
+                placeholder="000.000.000-00"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="field">
+            <label htmlFor="cnh">CNH</label>
+            <input
+              id="cnh"
+              value={cnh}
+              onChange={(e) => setCnh(e.target.value)}
+              disabled={naoPossuiCnh}
+              required={!naoPossuiCnh}
+            />
+            <label className="checkbox-row" style={{ marginTop: 8, marginBottom: 0 }}>
+              <input
+                type="checkbox"
+                checked={naoPossuiCnh}
+                onChange={(e) => { setNaoPossuiCnh(e.target.checked); if (e.target.checked) setCnh(""); }}
+              />
+              Não possui CNH
+            </label>
+          </div>
+
+          <div className="grid-2">
+            <div className="field">
+              <label htmlFor="ctps">CTPS</label>
+              <input id="ctps" value={ctps} onChange={(e) => setCtps(e.target.value)} required />
+            </div>
+            <div className="field">
+              <label htmlFor="pis">PIS/PASEP</label>
+              <input
+                id="pis"
+                value={pis}
+                onChange={(e) => setPis(formatarPis(e.target.value))}
+                placeholder="000.00000.00-0"
+                required
+              />
+            </div>
+          </div>
+
+          <h3 style={{ fontSize: "0.95rem", color: "var(--admin-texto)", margin: "20px 0 12px" }}>
+            Contato
+          </h3>
+
+          <div className="grid-2">
+            <div className="field">
+              <label htmlFor="telefone">Telefone de contato</label>
+              <input
+                id="telefone"
+                type="tel"
+                placeholder="(41) 99999-9999"
+                value={telefone}
+                onChange={(e) => setTelefone(e.target.value)}
+                required
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="email">E-mail</label>
+              <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            </div>
+          </div>
+
+          <div className="field">
+            <label htmlFor="endereco">Endereço residencial</label>
+            <input id="endereco" value={endereco} onChange={(e) => setEndereco(e.target.value)} required />
+          </div>
+
+          <button className="btn btn-dourado" disabled={salvando}>
+            {salvando ? "Salvando..." : "Cadastrar funcionário"}
+          </button>
+        </form>
+      </div>
+
+      <h2 style={{ fontSize: "1.1rem", color: "var(--admin-dourado)", margin: "32px 0 12px" }}>
+        Funcionários cadastrados
+      </h2>
+
+      {carregandoLista ? (
+        <p style={{ color: "var(--admin-texto-soft)" }}>Carregando...</p>
+      ) : funcionarios.length === 0 ? (
+        <p style={{ color: "var(--admin-texto-soft)" }}>Nenhum funcionário cadastrado ainda.</p>
+      ) : (
+        <div className="admin-card-lista">
+          {funcionarios.map((f) => (
+            <div className="linha" key={f.id}>
+              <span>
+                {f.nome}
+                <small>
+                  {f.cargo} · CPF {f.cpf}
+                </small>
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
