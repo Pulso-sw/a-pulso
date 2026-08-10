@@ -984,3 +984,31 @@ tr:last-child td { border-bottom: none; }
 @media (prefers-reduced-motion: reduce) {
   .hero-ecg-track { animation: none; }
 }
+/* Hero azul — banner de boas-vindas do Admin */
+.admin-hero {
+  background: linear-gradient(160deg, #1B2657 0%, var(--pulso) 55%, #1B2657 100%);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 56px;
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-hero .admin-titulo {
+  color: #FFFFFF;
+}
+
+.admin-hero .admin-eyebrow {
+  color: #FFFFFF;
+  opacity: 0.85;
+}
+
+@media (max-width: 640px) {
+  .admin-hero {
+    padding: 32px 24px;
+    min-height: auto;
+  }
+}
