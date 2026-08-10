@@ -71,10 +71,7 @@ export default function BoasVindas() {
     <div className="bv-root">
 
       {/* ── Hero — mantido integralmente ── */}
-      <div
-        className="admin-hero"
-        style={{ backgroundImage: "url(/Imagemdefundo.png)" }}
-      >
+     <div className="admin-hero">
         <div className="admin-hero-overlay" />
         <div className="admin-hero-content">
           <p className="admin-eyebrow">Painel administrativo</p>
