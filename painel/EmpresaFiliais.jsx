@@ -42,6 +42,7 @@ export default function EmpresaFiliais() {
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
+  const [codigoCopiado, setCodigoCopiado] = useState(false);
 
   const [excluirEmpresaAberto, setExcluirEmpresaAberto] = useState(false);
   const [excluindoEmpresa, setExcluindoEmpresa] = useState(false);
@@ -173,6 +174,18 @@ export default function EmpresaFiliais() {
     setFilialParaExcluir(null);
   }
 
+  async function handleCopiarCodigo() {
+    if (!empresa?.codigo_convite) return;
+    try {
+      await navigator.clipboard.writeText(empresa.codigo_convite);
+      setCodigoCopiado(true);
+      setTimeout(() => setCodigoCopiado(false), 2000);
+    } catch {
+      // navegadores sem permissão de clipboard: ignora silenciosamente,
+      // o código já está visível na tela pra copiar manualmente
+    }
+  }
+
   if (carregando) return <p style={{ color: "var(--admin-texto-soft)" }}>Carregando...</p>;
 
   return (
@@ -231,6 +244,32 @@ export default function EmpresaFiliais() {
 
       {empresa && (
         <>
+          <div className="painel-azul" style={{ marginTop: 20 }}>
+            <p style={{ color: "var(--admin-texto-soft)", fontSize: "0.85rem", marginBottom: 8 }}>
+              Código de convite da empresa
+            </p>
+            <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+              <span
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "1.6rem",
+                  letterSpacing: "0.2em",
+                  color: "var(--admin-dourado)",
+                  fontWeight: 700
+                }}
+              >
+                {empresa.codigo_convite}
+              </span>
+              <button type="button" className="btn btn-dourado" onClick={handleCopiarCodigo}>
+                {codigoCopiado ? "Copiado!" : "Copiar código"}
+              </button>
+            </div>
+            <p style={{ color: "var(--admin-texto-soft)", fontSize: "0.8rem", marginTop: 10 }}>
+              Compartilhe esse código com seu RH e colaboradores — eles usam ele na hora de criar a conta
+              pra entrar automaticamente nesta empresa.
+            </p>
+          </div>
+
           <h2 style={{ fontSize: "1.1rem", color: "var(--admin-texto)", margin: "32px 0 12px" }}>Filiais</h2>
 
           <div className="painel-azul">
