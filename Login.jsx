@@ -66,6 +66,7 @@ export default function Login() {
   const [telefone, setTelefone] = useState("");
   const [cargo, setCargo] = useState("funcionario");
   const [categoria, setCategoria] = useState("clt");
+  const [codigoEmpresa, setCodigoEmpresa] = useState("");
   const [codigo, setCodigo] = useState("");
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
@@ -116,6 +117,12 @@ export default function Login() {
     setErro("");
     setCarregando(true);
 
+    if (cargo !== "administrador" && !codigoEmpresa.trim()) {
+      setErro("Informe o código da empresa fornecido pelo seu administrador.");
+      setCarregando(false);
+      return;
+    }
+
     const { error } = await supabase.auth.signUp({ email, password: senha });
     if (error) {
       setErro(traduzErro(error.message));
@@ -124,7 +131,13 @@ export default function Login() {
     }
 
     // guarda os dados do perfil pra criar assim que o código for confirmado
-    setDadosPendentes({ nome, telefone, cargo, categoria: cargo === "funcionario" ? categoria : null });
+    setDadosPendentes({
+      nome,
+      telefone,
+      cargo,
+      categoria: cargo === "funcionario" ? categoria : null,
+      codigoEmpresa: codigoEmpresa.trim() || null
+    });
     setSucesso("");
     setModo("confirmar");
     setCarregando(false);
@@ -144,14 +157,32 @@ export default function Login() {
 
     const userId = data.user?.id;
     if (userId && dadosPendentes) {
+      let empresaId = null;
+      let avisoEmpresa = "";
+
+      if (dadosPendentes.codigoEmpresa) {
+        const { data: empresaEncontrada, error: erroCodigo } = await supabase.rpc(
+          "empresa_id_por_codigo",
+          { p_codigo: dadosPendentes.codigoEmpresa }
+        );
+        if (!erroCodigo && empresaEncontrada) {
+          empresaId = empresaEncontrada;
+        } else {
+          avisoEmpresa =
+            "Sua conta foi criada, mas não encontramos uma empresa com esse código. Peça o código certo ao seu administrador — ele pode te vincular depois.";
+        }
+      }
+
       const { error: erroPerfil } = await supabase.from("perfis").insert({
         id: userId,
         nome: dadosPendentes.nome,
         telefone: dadosPendentes.telefone,
         cargo: dadosPendentes.cargo,
-        categoria: dadosPendentes.categoria
+        categoria: dadosPendentes.categoria,
+        empresa_id: empresaId
       });
       if (erroPerfil) setErro(erroPerfil.message);
+      else if (avisoEmpresa) setErro(avisoEmpresa);
       // a partir daqui, um Database Webhook cuida de disparar o SMS de boas-vindas
     }
     setCarregando(false);
@@ -355,6 +386,25 @@ export default function Login() {
                     </select>
                   </div>
                 )}
+
+                <div className="field">
+                  <label htmlFor="codigoEmpresa">
+                    {cargo === "administrador" ? "Código da empresa (se já tiver uma)" : "Código da empresa"}
+                  </label>
+                  <input
+                    id="codigoEmpresa"
+                    value={codigoEmpresa}
+                    onChange={(e) => setCodigoEmpresa(e.target.value.toUpperCase())}
+                    placeholder="Ex: A3F9K2"
+                    style={{ textTransform: "uppercase" }}
+                    required={cargo !== "administrador"}
+                  />
+                  <p style={{ color: "var(--ink-soft)", fontSize: "0.78rem", marginTop: 4 }}>
+                    {cargo === "administrador"
+                      ? "Deixe em branco se você vai cadastrar uma empresa nova depois de entrar."
+                      : "Peça esse código para o administrador ou RH da sua empresa."}
+                  </p>
+                </div>
               </>
             )}
 
