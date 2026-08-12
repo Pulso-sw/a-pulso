@@ -50,10 +50,18 @@ export default function EmpresaFiliais() {
 
   useEffect(() => {
     async function carregar() {
+      // A empresa é a que está vinculada ao MEU perfil (empresa_id),
+      // não necessariamente a que eu criei — importante para funcionar
+      // com múltiplos administradores/RH na mesma empresa.
+      if (!perfil.empresa_id) {
+        setCarregando(false);
+        return;
+      }
+
       const { data: empresaExistente } = await supabase
         .from("empresas")
         .select("*")
-        .eq("criado_por", perfil.id)
+        .eq("id", perfil.empresa_id)
         .maybeSingle();
 
       if (empresaExistente) {
@@ -72,7 +80,7 @@ export default function EmpresaFiliais() {
       setCarregando(false);
     }
     carregar();
-  }, [perfil.id]);
+  }, [perfil.empresa_id]);
 
   async function handleSalvarEmpresa(e) {
     e.preventDefault();
@@ -89,6 +97,7 @@ export default function EmpresaFiliais() {
         .maybeSingle();
       if (error) setErro(error.message);
       else { setEmpresa(data); setSucesso("Dados da empresa atualizados."); }
+      setSalvando(false);
     } else {
       const { data, error } = await supabase
         .from("empresas")
@@ -97,14 +106,18 @@ export default function EmpresaFiliais() {
         .maybeSingle();
       if (error) {
         setErro(error.message);
-      } else {
-        setEmpresa(data);
-        setSucesso("Empresa cadastrada com sucesso.");
-        // vincula automaticamente quem criou a empresa a ela
-        await supabase.from("perfis").update({ empresa_id: data.id }).eq("id", perfil.id);
+        setSalvando(false);
+        return;
       }
+
+      setEmpresa(data);
+      setSucesso("Empresa cadastrada com sucesso.");
+      // vincula automaticamente quem criou a empresa a ela
+      await supabase.from("perfis").update({ empresa_id: data.id }).eq("id", perfil.id);
+
+      // recarrega a página pra o resto do sistema já reconhecer a empresa vinculada
+      setTimeout(() => window.location.reload(), 1200);
     }
-    setSalvando(false);
   }
 
   async function handleExcluirEmpresa() {
